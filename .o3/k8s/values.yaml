@@ -1,0 +1,45 @@
+replicaCount: 1
+
+vaultScheme: "2"
+
+
+service:
+  type: ClusterIP
+  monitoringScope: goapi
+  ports:
+    - name: http
+      port: 80
+    - name: grpc
+      port: 82
+    - name: debug
+      port: 84
+
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+readinessProbe:
+  initialDelaySeconds: 5
+  httpGet:
+    path: /ready
+    port: debug
+
+livenessProbe:
+  httpGet:
+    path: /live
+    port: debug
+
+# basic alerts https://confluence.dg.ru/pages/viewpage.action?pageId=102966752
+monitoring:
+  opsgenie:
+    responsibleTeam: "mp_ocb_team"
+  baseAlerts:
+    enabled: true
+
+# etcd realtime config - https://confluence.dg.ru/pages/viewpage.action?pageId=81479040
+realtimeConfig:
+  log_level:
+    usage: Log level enum
+    group: "scratch"
+    value: "WARN"
+    type: string
+    writable: true
+    view:
+      enum: [ERROR, WARN, INFO, DEBUG]

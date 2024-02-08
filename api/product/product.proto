@@ -1,0 +1,237 @@
+syntax = "proto3";
+
+package dg.ocb.product_creation.product_storage_api.pkg.product;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "gitlab.dg.ru/ocb/product-creation/ml-data-consumer/api/ml-data-consumer/service.proto";
+
+option go_package = "gitlab.dg.ru/ocb/product-creation/product-storage-api/pkg/product";
+
+message Attribute {
+  int64 id = 1;
+  string name = 2;
+  int64 complex_id = 3;
+
+  message Value {
+    int64 id = 1;
+    string value = 2;
+  }
+  repeated Value values = 4;
+}
+
+message Image{
+  string url = 1;
+  string ceph_url = 2;
+  bool is_main = 3;
+}
+
+message Error {
+  string attribute = 1;
+  string description = 2;
+}
+
+message ProductToCreate {
+  string id = 1;
+  repeated Attribute attributes = 2;
+  string name = 3;
+  string description = 4;
+  string barcode = 5;
+  int64 vat = 6;
+  int64 price = 7;
+  repeated Image images = 8;
+
+  int64 depth = 9;
+  int64 weight = 10;
+  int64 height = 11;
+  int64 width = 12;
+
+  int64 commercial_category_id = 13;
+  int64 description_category_id = 14;
+}
+
+message ProductToCorrect {
+  string id = 1;
+  repeated Attribute attributes = 2;
+  string name = 3;
+  string description = 4;
+  string barcode = 5;
+  int64 vat = 6;
+  int64 price = 7;
+  repeated Image images = 8;
+
+  int64 depth = 9;
+  int64 weight = 10;
+  int64 height = 11;
+  int64 width = 12;
+
+  int64 commercial_category_id = 13;
+  int64 description_category_id = 14;
+
+  repeated Error errors = 15;
+}
+
+message ProductToFill {
+  string id = 1;
+  int64 fulfillment = 2;
+  int64 root_category_id = 3;
+  int64 priority_category_id = 4;
+}
+
+message Product {
+  string id = 1;
+  repeated Attribute attributes = 2;
+  string name = 3;
+  string description = 4;
+  string barcode = 5;
+  int64 vat = 6;
+  int64 price = 7;
+  repeated Image images = 8;
+
+  int64 depth = 9;
+  int64 weight = 10;
+  int64 height = 11;
+  int64 width = 12;
+
+  int64 commercial_category_id = 13;
+  int64 description_category_id = 14;
+
+  string state = 15;
+  int64 fulfillment = 16;
+  map<string, google.protobuf.Any> meta = 17;
+
+  google.protobuf.Timestamp created_at = 18;
+  google.protobuf.Timestamp updated_at = 19;
+
+  repeated dg.ocb.product_creation.ml_data_consumer.pkg.competitor.CompetitorProduct competitor_products = 20;
+}
+
+message ProductForUpdate {
+  string id = 1;
+  repeated Attribute attributes = 2;
+  string name = 3;
+  string description = 4;
+  string barcode = 5;
+  int64 vat = 6;
+  int64 price = 7;
+  repeated Image images = 8;
+
+  int64 depth = 9;
+  int64 weight = 10;
+  int64 height = 11;
+  int64 width = 12;
+
+  int64 commercial_category_id = 13;
+}
+
+message Seller {
+  string title = 1;
+  string ogrn = 2;
+}
+
+message Sellers {
+  repeated Seller sellers = 1;
+}
+
+message Brand {
+  string title = 1;
+}
+
+message ProductForCreate {
+  string id = 1;
+  repeated Attribute attributes = 2;
+  string name = 3;
+  string description = 4;
+  string barcode = 5;
+  int64 vat = 6;
+  int64 price = 7;
+  repeated Image images = 8;
+
+  int64 depth = 9;
+  int64 weight = 10;
+  int64 height = 11;
+  int64 width = 12;
+
+  int64 commercial_category_id = 13;
+  int64 description_category_id = 14;
+
+  repeated string canonical_ids = 15;
+  map<string, google.protobuf.Any> meta = 16;
+}
+
+message MetricsProductUpdate {
+  string id = 1;
+  string name = 2;
+  int64 fulfillment = 3;
+  string brand = 4;
+  string barcode = 5;
+  int64 commercial_category_id = 6;
+  Sellers sellers = 7;
+  string state = 8;
+  int64 block_reason = 9;
+
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+
+  repeated int64 user_ids = 12;
+  string LastUpdateSource = 13;
+}
+
+message MetricsMessage {
+  oneof message_type {
+    MetricsProductUpdate product_update = 1;
+  }
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+
+message GetProductResponse {
+  Product product = 1;
+}
+
+message GetProductsRequest {
+  repeated string product_ids = 1;
+}
+
+message GetProductsResponse {
+  repeated Product products = 1;
+}
+
+message CreateProductsRequest {
+  repeated ProductForCreate products = 1;
+}
+
+message UpdateProductsRequest {
+  repeated ProductForUpdate products = 1;
+}
+
+message UpdateProductsResponse {
+  bool success = 1;
+  repeated Error errors = 2;
+}
+
+message UpdateProductStateRequest {
+  string product_id = 1;
+  string state = 2;
+  int64 block_reason = 3;
+}
+
+message UpdateProductStateResponse {
+  bool success = 1;
+  map<string, string> errors = 2;
+}
+
+service ProductAPI {
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse) {}
+
+  rpc GetProducts (GetProductsRequest) returns (GetProductsResponse) {}
+
+  rpc CreateProducts (CreateProductsRequest) returns (google.protobuf.Empty) {}
+
+  rpc UpdateProducts (UpdateProductsRequest) returns (UpdateProductsResponse) {}
+
+  rpc UpdateProductState (UpdateProductStateRequest) returns (UpdateProductStateResponse) {}
+}

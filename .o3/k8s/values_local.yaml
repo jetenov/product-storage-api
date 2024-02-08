@@ -1,0 +1,82 @@
+# Place realtime config values for LOCAL development here
+realtimeConfig:
+  log_level:
+    value: "INFO"
+
+deploy:
+  env:
+    - name: OCB_PRODUCT_STORAGE_API_OGRN_LIST
+      value: "1223345678999887;12334556677899"
+    - name: OCB_PRODUCT_STORAGE_API_BRAND_LIST
+      value: "nike;adidas"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_BROKER_LIST
+      value: "devkafka1z26.yc.o3.ru:9092 devkafka2z26.yc.o3.ru:9092 devkafka3z26.yc.o3.ru:9092"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_GROUP_SUFFIX
+      value: dev
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_CREATE_TOPIC
+      value: "ocb_product_status_to_create"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_CORRECT_TOPIC
+      value: "ocb_product_status_to_correct"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_FILL_TOPIC
+      value: "ocb_product_status_to_fill"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_METRICS_TOPIC
+      value: "ocb_product_metrics"
+    - name: OCB_PRODUCT_STORAGE_API_CATEGORIES_API_GATEWAY
+      value: o3:///categories-api:grpc
+    - name: OCB_PRODUCT_STORAGE_API_VALIDATION_API_GATEWAY
+      value: o3:///ocb-validation-service:grpc
+    - name: OCB_PRODUCT_STORAGE_API_COMPETITOR_API_GATEWAY
+      value: o3:///ml-data-consumer:grpc
+    - name: OCB_PRODUCT_STORAGE_API_PRODUCT_BATCH_SIZE
+      value: 1000
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_LIMIT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_IDLE
+      value: 5
+    - name: OCB_PRODUCT_STORAGE_API_PG_DSN
+      value: pg_dsn
+    - name: OCB_PRODUCT_STORAGE_API_SHARD_CONFIG
+      value: '
+{
+  "shards": [
+    {
+      "name": "shard_1",
+      "dsn": "pg_dsn_shard_1",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_2",
+      "dsn": "pg_dsn_shard_2",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    }
+  ],
+  "buckets": {
+    "count": 4096,
+    "desc": [
+      {
+        "range": [
+          0,
+          2047
+        ],
+        "shard": "shard_1"
+      },
+      {
+        "range": [
+          2048,
+          4095
+        ],
+        "shard": "shard_2"
+      }
+    ]
+  }
+}'
+
+secrets:
+  - name: pg_dsn
+    value: "host=localhost port=5432 user=postgres dbname=product-api password=root sslmode=disable"
+  - name: pg_dsn_shard_1
+    value: "host=localhost port=5432 user=postgres dbname=product-api password=root sslmode=disable"
+  - name: pg_dsn_shard_2
+    value: "host=localhost port=5432 user=postgres dbname=product-api password=root sslmode=disable"

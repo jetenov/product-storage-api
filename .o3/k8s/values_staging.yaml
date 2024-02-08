@@ -1,0 +1,114 @@
+# Place staging overrides here
+replicaCount: 3
+
+deploy:
+  env:
+    - name: OCB_PRODUCT_STORAGE_API_OGRN_LIST
+      value: "1067746268732;1057601110930;1067746062449;5177746098844;1117746072300;1177232021350;1187847380159;1117746491500;1067746268732;1107746597782;1205000064917;5177746033141"
+    - name: OCB_PRODUCT_STORAGE_API_BRAND_LIST
+      value: ""
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_BROKER_LIST
+      value: "stgkafkabroker1.s.o3.ru:9092 stgkafkabroker2.s.o3.ru:9092 stgkafkabroker3.s.o3.ru:9092 stgkafkabroker4.s.o3.ru:9092 stgkafkabroker5.s.o3.ru:9092"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_GROUP_SUFFIX
+      value: stg
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_CREATE_TOPIC
+      value: "ocb_product_status_to_create"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_CORRECT_TOPIC
+      value: "ocb_product_status_to_correct"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_FILL_TOPIC
+      value: "ocb_product_status_to_fill"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_METRICS_TOPIC
+      value: "ocb_product_metrics"
+    - name: OCB_PRODUCT_STORAGE_API_CATEGORIES_API_GATEWAY
+      value: o3:///categories-api:grpc
+    - name: OCB_PRODUCT_STORAGE_API_VALIDATION_API_GATEWAY
+      value: o3:///ocb-validation-service:grpc
+    - name: OCB_PRODUCT_STORAGE_API_COMPETITOR_API_GATEWAY
+      value: o3:///ml-data-consumer:grpc
+    - name: OCB_PRODUCT_STORAGE_API_PRODUCT_SERVICE_META_GATEWAY
+      value: o3:///product-service-meta:grpc
+    - name: OCB_PRODUCT_STORAGE_API_IMAGE_STORAGE_API_GATEWAY
+      value: o3:///ocb-images-storage-api:grpc
+    - name: OCB_PRODUCT_STORAGE_API_IMAGE_WORKERS_COUNT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_PRODUCT_BATCH_SIZE
+      value: 1000
+    - name: OCB_PRODUCT_STORAGE_API_LOG_LEVEL
+      value: WARN
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_LIMIT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_IDLE
+      value: 5
+    - name: OCB_PRODUCT_STORAGE_API_SHARD_CONFIG
+      value: '
+{
+  "shards": [
+    {
+      "name": "shard_1",
+      "dsn": "pg_dsn_shard_1",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_2",
+      "dsn": "pg_dsn_shard_2",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_3",
+      "dsn": "pg_dsn_shard_3",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_4",
+      "dsn": "pg_dsn_shard_4",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    }
+  ],
+  "buckets": {
+    "count": 4096,
+    "desc": [
+      {
+        "range": [
+          0,
+          1023
+        ],
+        "shard": "shard_1"
+      },
+      {
+        "range": [
+          1024,
+          2047
+        ],
+        "shard": "shard_2"
+      },
+      {
+        "range": [
+          2048,
+          3071
+        ],
+        "shard": "shard_3"
+      },
+      {
+        "range": [
+          3072,
+          4095
+        ],
+        "shard": "shard_4"
+      }
+    ]
+  }
+}'
+
+migration:
+  vault: true
+  vaultInit:
+    name: vault-init
+    env:
+      - name: VAULT_VAR
+        value: "pg__ocb-product-storage-api-shard-1__password::value pg__ocb-product-storage-api-shard-2__password::value pg__ocb-product-storage-api-shard-3__password::value pg__ocb-product-storage-api-shard-4__password::value"
+      - name: SECRET_PATH
+        value: "/var/run/secrets"

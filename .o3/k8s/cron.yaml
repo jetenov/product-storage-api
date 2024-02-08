@@ -1,0 +1,6 @@
+vaultScheme: "2"
+
+deploy:
+  env:
+    - name: OCB_PRODUCT_STORAGE_API_LOG_LEVEL
+      value: INFO

@@ -1,0 +1,93 @@
+deploy:
+  env:
+    - name: OCB_PRODUCT_STORAGE_API_IMAGE_STORAGE_API_GATEWAY
+      value: o3:///ocb-images-storage-api:grpc
+    - name: OCB_PRODUCT_STORAGE_API_IMAGE_WORKERS_COUNT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_BATCH_SIZE
+      value: 1000
+    - name: OCB_PRODUCT_STORAGE_API_SAVE_BATCH_SIZE
+      value: 400
+    - name: OCB_PRODUCT_STORAGE_API_CEPH_IMAGE_PREFIX
+      value: "https://cdn1.dge.ru"
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_LIMIT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_IDLE
+      value: 5
+    - name: OCB_PRODUCT_STORAGE_API_PG_DSN
+      value: pg_dsn
+    - name: OCB_PRODUCT_STORAGE_API_SHARD_CONFIG
+      value: '
+{
+  "shards": [
+    {
+      "name": "shard_1",
+      "dsn": "pg_dsn_shard_1",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_2",
+      "dsn": "pg_dsn_shard_2",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_3",
+      "dsn": "pg_dsn_shard_3",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_4",
+      "dsn": "pg_dsn_shard_4",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    }
+  ],
+  "buckets": {
+    "count": 4096,
+    "desc": [
+      {
+        "range": [
+          0,
+          1023
+        ],
+        "shard": "shard_1"
+      },
+      {
+        "range": [
+          1024,
+          2047
+        ],
+        "shard": "shard_2"
+      },
+      {
+        "range": [
+          2048,
+          3071
+        ],
+        "shard": "shard_3"
+      },
+      {
+        "range": [
+          3072,
+          4095
+        ],
+        "shard": "shard_4"
+      }
+    ]
+  }
+}'
+
+jobs:
+  - subName: ceph-image-loader
+    image:
+      imagePullPolicy: Always
+    # cron format
+    schedule: "* * * * *"
+    command: [ "./ceph-image-loader" ]
+    # limits for history
+    failedJobsHistoryLimit: 3
+    successfulJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid

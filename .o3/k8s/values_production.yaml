@@ -1,0 +1,114 @@
+# Place production overrides here
+replicaCount: 3
+
+deploy:
+  env:
+    - name: OCB_PRODUCT_STORAGE_API_OGRN_LIST
+      value: "1033303401163;304263220500028;310010111800112;1057601110930;314184008600012;1127746679675;307265033800021;318619600090350;1127747167492;1075045000161;317774600507619;304540529500112;5167746241856;313370213600016;1026104024737;1025001418848;1107746386516;319774600478115;1185476059537;304770000402162;1114401004530;1097847317721;1047796371754;1027700001251;319508100300320;1117746949880;1127747125593;320440100000781;312631202000055;320774600531873;304443735900103;309391420200040;304366234500112;1076952029000;319774600511146;1177847360646;318440100024681;1207700478259;304770001270498;319774600491301"
+    - name: OCB_PRODUCT_STORAGE_API_BRAND_LIST
+      value: ""
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_BROKER_LIST
+      value: "prodkafkabroker1.s.o3.ru:9092 prodkafkabroker2.s.o3.ru:9092 prodkafkabroker3.s.o3.ru:9092 prodkafkabroker4.s.o3.ru:9092 prodkafkabroker5.s.o3.ru:9092"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_GROUP_SUFFIX
+      value: prod
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_CREATE_TOPIC
+      value: "ocb_product_status_to_create"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_CORRECT_TOPIC
+      value: "ocb_product_status_to_correct"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_FILL_TOPIC
+      value: "ocb_product_status_to_fill"
+    - name: OCB_PRODUCT_STORAGE_API_KAFKA_METRICS_TOPIC
+      value: "ocb_product_metrics"
+    - name: OCB_PRODUCT_STORAGE_API_CATEGORIES_API_GATEWAY
+      value: o3:///categories-api:grpc
+    - name: OCB_PRODUCT_STORAGE_API_VALIDATION_API_GATEWAY
+      value: o3:///ocb-validation-service:grpc
+    - name: OCB_PRODUCT_STORAGE_API_COMPETITOR_API_GATEWAY
+      value: o3:///ml-data-consumer:grpc
+    - name: OCB_PRODUCT_STORAGE_API_PRODUCT_SERVICE_META_GATEWAY
+      value: o3:///product-service-meta:grpc
+    - name: OCB_PRODUCT_STORAGE_API_IMAGE_STORAGE_API_GATEWAY
+      value: o3:///ocb-images-storage-api:grpc
+    - name: OCB_PRODUCT_STORAGE_API_IMAGE_WORKERS_COUNT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_PRODUCT_BATCH_SIZE
+      value: 1000
+    - name: OCB_PRODUCT_STORAGE_API_LOG_LEVEL
+      value: WARN
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_LIMIT
+      value: 10
+    - name: OCB_PRODUCT_STORAGE_API_PG_CONN_IDLE
+      value: 5
+    - name: OCB_PRODUCT_STORAGE_API_SHARD_CONFIG
+      value: '
+{
+  "shards": [
+    {
+      "name": "shard_1",
+      "dsn": "pg_dsn_shard_1",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_2",
+      "dsn": "pg_dsn_shard_2",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_3",
+      "dsn": "pg_dsn_shard_3",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    },
+    {
+      "name": "shard_4",
+      "dsn": "pg_dsn_shard_4",
+      "max_open_connections": 10,
+      "max_idle_connections": 5
+    }
+  ],
+  "buckets": {
+    "count": 4096,
+    "desc": [
+      {
+        "range": [
+          0,
+          1023
+        ],
+        "shard": "shard_1"
+      },
+      {
+        "range": [
+          1024,
+          2047
+        ],
+        "shard": "shard_2"
+      },
+      {
+        "range": [
+          2048,
+          3071
+        ],
+        "shard": "shard_3"
+      },
+      {
+        "range": [
+          3072,
+          4095
+        ],
+        "shard": "shard_4"
+      }
+    ]
+  }
+}'
+
+migration:
+  vault: true
+  vaultInit:
+    name: vault-init
+    env:
+      - name: VAULT_VAR
+        value: "pg__ocb-product-storage-api-shard-1__password::value pg__ocb-product-storage-api-shard-2__password::value pg__ocb-product-storage-api-shard-3__password::value pg__ocb-product-storage-api-shard-4__password::value"
+      - name: SECRET_PATH
+        value: "/var/run/secrets"
